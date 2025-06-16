@@ -1,5 +1,5 @@
 
-# This COde Inculdes...
+# This Code Inculdes...
 
 # ✔ Batch insert using insert_many() (faster MongoDB writes).
 # ✔ Error handling for API & MongoDB failures (timeouts, DB errors, etc.).
