@@ -2,3 +2,5 @@ fastapi
 uvicorn[standard]
 asyncpg
 databases[postgresql]
+sqlalchemy
+psycopg2-binary
