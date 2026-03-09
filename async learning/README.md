@@ -10,6 +10,13 @@ Coroutines are a special kind of function in Python that allow for cooperative m
 2. They can be paused with await – This allows a coroutine to yield control back to the event loop while waiting for something (e.g., network response, I/O operation).
 3. They enable concurrency without threads – Coroutines allow multiple tasks to run concurrently without creating multiple threads.
 
+await does two things simultaneously:
+
+1️⃣ Calls another coroutine / awaitable
+2️⃣ Suspends the current coroutine until the awaited task finishes
+
+So when Python reaches await, the coroutine pauses its execution and the event loop can run other coroutines.
+
 Example :
 
 ``` python
