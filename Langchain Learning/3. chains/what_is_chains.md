@@ -1,66 +1,132 @@
-# **📌 Summary of LLM Chains & Related Concepts in LangChain**  
+Your document is **conceptually strong**, but a few parts are **outdated for modern LangChain (v0.2+ / v0.3)**. The biggest changes:
 
-This document consolidates all discussions on **LLM Chains, Pipe (`|`) Operator, Prompt Templates, and Token Cost Calculation** in LangChain.  
+1. **`LLMChain` is now considered legacy**
+2. **LCEL (`prompt | llm`) is the recommended way**
+3. Imports moved to **`langchain_core`**
+4. `ChatOpenAI` examples should use **`.invoke()`**
+5. Token usage is now usually accessed via **`response.response_metadata` or callbacks**
+6. Some wording about chains needs updating
+
+I'll give you a **corrected version of your doc while preserving your structure**.
 
 ---
 
-## **🔹 What are LLM Chains?**  
-An **LLM Chain (`LLMChain`)** is a structured way to process inputs and outputs in LangChain. Instead of calling an LLM directly, LLMChains allow:  
-✅ **Modularity** – Break down workflows into reusable components.  
-✅ **Prompt Management** – Use **Prompt Templates** dynamically.  
-✅ **Multi-Step Pipelines** – Chain multiple calls together.  
-✅ **Memory Support** – Retain chat history across interactions.  
+# Revised Document (Modern LangChain)
 
-### **🔹 Why Not Call `llm(prompt)` Directly?**  
-Although we can directly call an LLM like this:  
-```python
-llm("Explain Quantum Computing in simple terms.")
+```md
+# Summary of Chains & Related Concepts in LangChain
+
+This document summarizes concepts related to:
+
+- Chains
+- LCEL (`|` operator)
+- Prompt Templates
+- Structured Outputs
+- Token Usage
+
+---
+
+# What are Chains in LangChain?
+
+A **chain** represents a sequence of components where the output of one step becomes the input of the next.
+
+Example pipeline:
+
 ```
-Using **LLMChains** provides **better structure, reusability, and debugging** for complex workflows.  
+
+Prompt → LLM → Output Parser
+
+````
+
+Chains help build **modular AI workflows**.
+
+Benefits:
+
+- Reusable components
+- Clear execution flow
+- Easier debugging
+- Composable pipelines
 
 ---
 
-## **🔹 Pipe (`|`) Operator vs. LLMChain**  
-LangChain **Expression Language (LCEL)** allows chaining operations using the `|` **pipe operator**, which is an alternative to `LLMChain`.
+# Old Approach: LLMChain (Legacy)
 
-### ✅ **Advantages of Pipe (`|`) Operator**  
-- **More Pythonic & Concise**  
-- **Readable & Functional Approach**  
-- **No Need to Manually Define Chains**  
+Older versions of LangChain used `LLMChain`.
 
-### **🔹 Example: Using LLMChain**
+Example:
+
 ```python
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
-llm = ChatOpenAI(model_name="gpt-4")
+prompt = PromptTemplate.from_template(
+    "Summarize {topic} in 3 bullet points."
+)
 
-# Define a prompt template
-prompt = PromptTemplate.from_template("Summarize {topic} in 3 bullet points.")
+llm = ChatOpenAI(model="gpt-4")
 
-# Create an LLMChain
 chain = LLMChain(llm=llm, prompt=prompt)
 
-# Invoke the chain
 response = chain.invoke({"topic": "Quantum Computing"})
 print(response)
-```
+````
 
-### **🔹 Example: Using Pipe (`|`) Operator**
-```python
-chain = prompt | llm
-response = chain.invoke({"topic": "Quantum Computing"})
-print(response)
-```
-✅ **Same functionality, but cleaner syntax with the pipe operator!**  
+However, **LLMChain is now considered legacy** and modern LangChain uses **LCEL**.
 
 ---
 
-## **🔹 Generating Structured Output (Pydantic Schema)**
-LangChain can **enforce structured output** using a **Pydantic schema**, ensuring responses follow a specific format.
+# Modern Approach: LCEL (LangChain Expression Language)
 
-### **🔹 Example: Enforcing Structured Output**
+LCEL allows you to compose chains using the **pipe (`|`) operator**.
+
+Example:
+
+```python
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+
+prompt = PromptTemplate.from_template(
+    "Summarize {topic} in 3 bullet points."
+)
+
+llm = ChatOpenAI(model="gpt-4")
+
+chain = prompt | llm
+
+response = chain.invoke({"topic": "Quantum Computing"})
+print(response.content)
+```
+
+Pipeline visualization:
+
+```
+
+PromptTemplate
+↓
+LLM
+↓
+Response
+
+```
+
+Advantages of LCEL:
+
+* More concise
+* Functional composition
+* Easier chaining of components
+* Better async support
+
+---
+
+# Generating Structured Output (Pydantic Schema)
+
+LangChain can enforce **structured outputs** using Pydantic schemas.
+
+This ensures responses follow a defined format.
+
+Example:
+
 ```python
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel
@@ -69,143 +135,186 @@ from langchain_openai import ChatOpenAI
 class SummarySchema(BaseModel):
     bullet_points: list[str]
 
-llm = ChatOpenAI(model_name="gpt-4")
+prompt = PromptTemplate.from_template(
+    "Summarize {topic} in 3 bullet points."
+)
 
-prompt = PromptTemplate.from_template("Summarize {topic} in 3 bullet points.")
+llm = ChatOpenAI(model="gpt-4")
+
 structured_llm = llm.with_structured_output(SummarySchema)
 
-# Using the pipe operator
 chain = prompt | structured_llm
+
 response = chain.invoke({"topic": "Artificial Intelligence"})
 
 print(response)
 ```
-🔹 **Ensures output follows the `SummarySchema` format**  
-🔹 **Useful for JSON APIs, structured reports, or validation**  
 
----
+Example output:
 
-## **🔹 Tracking Token Usage & Estimating Cost**
-Since **LLM calls consume tokens**, we should track **input/output tokens** and estimate the cost.
-
-### **🔹 `calculate_usage` Implementation**
-```python
-def calculate_usage(llm, raw_output):
-    """
-    Calculate the approximate cost of generating an LLM response.
-
-    Args:
-        llm: The LLM instance (must have model_name).
-        raw_output: The response from the LLM (must include token usage).
-
-    Returns:
-        Dictionary containing input tokens, output tokens, total tokens, and cost in USD.
-    """
-
-    # Extract token usage details (if available)
-    token_usage = raw_output.get("token_usage", {}) if isinstance(raw_output, dict) else {}
-
-    input_tokens = token_usage.get("input_tokens", 0)
-    output_tokens = token_usage.get("output_tokens", 0)
-    total_tokens = input_tokens + output_tokens
-
-    # Define pricing per 1,000 tokens (Update based on your LLM provider)
-    pricing_per_1k = {
-        "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
-        "gpt-4": {"input": 0.03, "output": 0.06},
-        "gpt-4-turbo": {"input": 0.01, "output": 0.03},
-    }
-
-    # Get model pricing (default to GPT-4-turbo if unknown)
-    model_name = getattr(llm, "model_name", "gpt-4-turbo").lower()
-    pricing = pricing_per_1k.get(model_name, pricing_per_1k["gpt-4-turbo"])
-
-    # Calculate cost
-    cost = (input_tokens / 1000) * pricing["input"] + (output_tokens / 1000) * pricing["output"]
-
-    return {
-        "model": model_name,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-        "total_tokens": total_tokens,
-        "cost_usd": round(cost, 6),
-    }
-```
-
-### **🔹 Example Usage**
-```python
-raw_output = {
-    "parsed": {"response": "This is an AI-generated response."},
-    "token_usage": {
-        "input_tokens": 50,
-        "output_tokens": 150
-    }
-}
-
-llm = ChatOpenAI(model_name="gpt-4")
-usage_stats = calculate_usage(llm, raw_output)
-
-print(usage_stats)
-```
-
-### **🔹 Example Output**
 ```json
 {
-    "model": "gpt-4",
-    "input_tokens": 50,
-    "output_tokens": 150,
-    "total_tokens": 200,
-    "cost_usd": 0.009
+  "bullet_points": [
+    "AI enables machines to perform intelligent tasks",
+    "AI uses machine learning and neural networks",
+    "AI is widely used in healthcare, finance, and automation"
+  ]
 }
 ```
-💡 **Cost Breakdown:**  
-- **Input (50 tokens):** `(50 / 1000) * $0.03 = $0.0015`  
-- **Output (150 tokens):** `(150 / 1000) * $0.06 = $0.009`  
-- **Total Cost:** `$0.009`  
+
+Structured output is useful for:
+
+* APIs
+* automation pipelines
+* data extraction
+* validation
 
 ---
 
-## **🔹 Putting It All Together: Full Example**
+# Tracking Token Usage
+
+LLM calls consume tokens.
+
+Tracking tokens helps estimate cost and monitor usage.
+
+Example response metadata:
+
 ```python
-from langchain_openai import ChatOpenAI
+response = chain.invoke({"topic": "Artificial Intelligence"})
+
+print(response.response_metadata)
+```
+
+Example output:
+
+```json
+{
+ "token_usage": {
+   "completion_tokens": 120,
+   "prompt_tokens": 60,
+   "total_tokens": 180
+ }
+}
+```
+
+You can use this data to estimate cost depending on the provider.
+
+---
+
+# Example: Token Usage Helper
+
+```python
+def calculate_usage(token_usage, pricing):
+    input_tokens = token_usage.get("prompt_tokens", 0)
+    output_tokens = token_usage.get("completion_tokens", 0)
+
+    input_cost = (input_tokens / 1000) * pricing["input"]
+    output_cost = (output_tokens / 1000) * pricing["output"]
+
+    return {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": input_tokens + output_tokens,
+        "cost_usd": round(input_cost + output_cost, 6)
+    }
+```
+
+---
+
+# Full Chain Example
+
+```python
 from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-# Define Pydantic schema
 class SummarySchema(BaseModel):
     bullet_points: list[str]
 
-# Function to generate structured output and track cost
-async def generate_structured_output(llm, prompt_template, inputs, schema):
-    prompt = PromptTemplate(
-        template=prompt_template, input_variables=list(inputs.keys())
-    )
+prompt = PromptTemplate.from_template(
+    "Summarize {topic} in 3 bullet points."
+)
 
-    structured_llm = llm.with_structured_output(schema, include_raw=True)
-    chain = prompt | structured_llm
-    raw_output = chain.invoke(inputs)
-    
-    output = raw_output.get("parsed") if isinstance(raw_output, dict) else raw_output
-    usage = calculate_usage(llm=llm, raw_output=raw_output)
+llm = ChatOpenAI(model="gpt-4")
 
-    return output, usage
+structured_llm = llm.with_structured_output(SummarySchema)
 
-# Define LLM and inputs
-llm = ChatOpenAI(model_name="gpt-4")
-prompt_template = "Summarize {topic} in 3 bullet points."
-inputs = {"topic": "Artificial Intelligence"}
+chain = prompt | structured_llm
 
-# Call the function
-structured_output, usage = await generate_structured_output(llm, prompt_template, inputs, SummarySchema)
+response = chain.invoke({"topic": "Artificial Intelligence"})
 
-print(structured_output)
-print(usage)
+print(response)
 ```
+
+Pipeline:
+
+```
+
+PromptTemplate
+↓
+Chat Model
+↓
+Structured Output Parser
+↓
+Final Output
+
+```
+
 ---
 
-## **📌 Key Takeaways**
-✅ **LLMChain & Pipe (`|`) Operator** – Both enable structured LLM interactions.  
-✅ **Prompt Templates** – Allow dynamic input injection.  
-✅ **Structured Output (Pydantic)** – Ensures valid, structured responses.  
-✅ **Token Usage Tracking** – Helps estimate API costs in real-time.  
-✅ **End-to-End Workflow** – Combine everything into a **scalable, modular system**.  
+# Key Takeaways
+
+* **Chains** allow modular LLM pipelines
+* **LLMChain** is now legacy
+* **LCEL (`|`) is the modern chaining approach**
+* **Prompt templates provide reusable prompts**
+* **Structured output ensures predictable responses**
+* **Token tracking helps monitor cost**
+
+Chains are the foundation for building:
+
+* RAG systems
+* AI agents
+* AI assistants
+* data extraction pipelines
+
+```
+
+---
+
+# What You Did Right (Important)
+
+Your document already correctly covered:
+
+- Prompt templates
+- Pipe operator
+- Structured output
+- Token tracking
+- Modular pipelines
+
+So the **conceptual understanding is already solid**.
+
+The fixes were mostly:
+
+- API updates
+- naming updates
+- deprecation cleanup
+
+---
+
+✅ Next concept you should revise after chains is **Output Parsers**, because the real LangChain pipeline becomes:
+
+```
+
+Prompt
+↓
+LLM
+↓
+Output Parser
+↓
+Structured Data
+
+```
+
+This concept is **extremely important for production GenAI systems**.
+```
