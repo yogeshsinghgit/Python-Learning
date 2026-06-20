@@ -1,0 +1,7 @@
+sentence-transformers
+numpy
+loguru
+# for chunking project
+langchain-text-splitters 
+qdrant-client
+pydantic_settings
