@@ -38,7 +38,7 @@ class Container:
             dense_vector_size=settings.dense_vector_size,
         )
 
-        self.dence_embedder = SentenceTransformerDenseEmbedder(
+        self.dense_embedder = SentenceTransformerDenseEmbedder(
             model_name=settings.dense_model,
         )
 

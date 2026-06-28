@@ -9,7 +9,13 @@ from qdrant_client.models import (
 
 from exceptions.collection import (
     CollectionCreationError,
+    CollectionNotFoundError,
 )
+from exceptions.connection import VectorDatabaseConnectionError
+from repositories.interfaces.collection_repository import (
+    CollectionRepository,
+)
+
 
 class QdrantCollectionRepository(CollectionRepository):
 
@@ -21,7 +27,22 @@ class QdrantCollectionRepository(CollectionRepository):
     ) -> None:
         self._client = client
         self._collection_name = collection_name
-        slef._dense_vector_size = dense_vector_size
+        self._dense_vector_size = dense_vector_size
+
+    async def verify_connection(self) -> None:
+        """
+        Verify the connection to the Qdrant server.
+        """
+        try:
+            await self._client.get_collections()
+            logger.info("Qdrant connection verified.")
+        except Exception as exc:
+            logger.exception(
+                f"Failed to connect to Qdrant: {exc}"
+            )
+            raise VectorDatabaseConnectionError(
+                "Unable to reach Qdrant."
+            ) from exc
 
     async def collection_exists(self) -> bool:
         """
@@ -119,6 +140,13 @@ class QdrantCollectionRepository(CollectionRepository):
                 f"Failed deleting collection: {exc}"
             )
 
-            raise CollectionCreationError(
+            raise CollectionNotFoundError(
                 f"Failed deleting '{self._collection_name}'."
             ) from exc
+
+    async def close(self) -> None:
+        """
+        Close the Qdrant async client connection.
+        """
+        await self._client.close()
+        logger.info("Qdrant client connection closed.")

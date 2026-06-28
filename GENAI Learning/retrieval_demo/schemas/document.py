@@ -4,13 +4,13 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
-class Chunk(BaseModel):
-
-    chunk_id: str
-    chunk_index: int
+class Document(BaseModel):
     document_id: str
+
     source: Path
-    text: str
+
+    content: str
+
     metadata: dict[str, Any] = Field(
-        default_factory=dict
+        default_factory=dict,
     )
