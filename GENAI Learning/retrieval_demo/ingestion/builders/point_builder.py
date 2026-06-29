@@ -130,4 +130,4 @@ class PointBuilder:
             f"Successfully built {len(points)} hybrid points."
         )
 
-        return points
+        return points
