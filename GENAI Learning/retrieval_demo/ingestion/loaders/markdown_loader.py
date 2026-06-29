@@ -9,36 +9,56 @@ from schemas.document import Document
 
 
 class MarkdownLoader(Loader):
-
     async def load(
         self,
         path: Path,
     ) -> Document:
-
         logger.info(
             f"Loading markdown file: {path}"
         )
 
         if not path.exists():
-            raise FileNotFoundError(path)
+            logger.error(
+                f"Markdown file not found: {path}"
+            )
+            raise FileNotFoundError(
+                f"{path} does not exist."
+            )
 
-        async with aiofiles.open(
-            path,
-            "r",
-            encoding="utf-8",
-        ) as file:
+        if path.suffix.lower() != ".md":
+            logger.error(
+                f"Unsupported file type: {path.suffix}"
+            )
+            raise ValueError(
+                "Only markdown (.md) files are supported."
+            )
 
-            content = await file.read()
+        try:
+            async with aiofiles.open(
+                path,
+                mode="r",
+                encoding="utf-8",
+            ) as file:
+                content = await file.read()
 
-        logger.success(
-            f"Loaded markdown file: {path.name}"
-        )
+            document = Document(
+                document_id=str(uuid4()),
+                source=path,
+                content=content,
+                metadata={
+                    "file_name": path.name,
+                    "extension": path.suffix,
+                },
+            )
 
-        return Document(
-            document_id=str(uuid4()),
-            source=path,
-            content=content,
-            metadata={
-                "file_name": path.name,
-            },
-        )
+            logger.success(
+                f"Loaded '{path.name}' successfully."
+            )
+
+            return document
+
+        except Exception as exc:
+            logger.exception(
+                f"Failed to load markdown file: {exc}"
+            )
+            raise

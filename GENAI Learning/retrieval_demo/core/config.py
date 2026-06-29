@@ -19,6 +19,10 @@ class Settings(BaseSettings):
         default="Qdrant/bm25"
     )
 
+    chunk_size: int = Field(default=500)
+
+    chunk_overlap: int = Field(default=100)
+
     ingestion_batch_size: int = Field(default=100)
 
     log_level: str = Field(default="INFO")

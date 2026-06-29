@@ -22,6 +22,15 @@ from ingestion.services.ingestion_service import (
     IngestionService,
 )
 
+from ingestion.loaders.markdown_loader import (
+    MarkdownLoader,
+)
+
+from ingestion.chunkers.recursive_chunker import (
+    RecursiveChunker,
+)
+
+
 class Container:
     def __init__(self) -> None:
         settings = get_settings()
@@ -57,9 +66,18 @@ class Container:
             batch_size=100,
         )
 
+        self.loader = MarkdownLoader()
+
+        self.chunker = RecursiveChunker(
+            chunk_size=settings.chunk_size,
+            chunk_overlap=settings.chunk_overlap,
+        )
+
         self.ingestion_service = IngestionService(
+            loader=self.loader,
+            chunker=self.chunker,
             collection_repository=self.collection_repository,
             point_repository=self.point_repository,
             point_builder=self.point_builder,
-            batch_size=settings.ingestion_batch_size
+            batch_size=settings.ingestion_batch_size,
         )

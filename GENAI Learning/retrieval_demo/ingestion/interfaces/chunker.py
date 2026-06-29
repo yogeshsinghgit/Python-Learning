@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
 
+from schemas.chunk import Chunk
 from schemas.document import Document
 
 
-class Loader(ABC):
+class Chunker(ABC):
+
     @abstractmethod
-    async def load(
+    async def chunk(
         self,
-        path: Path,
-    ) -> Document:
+        document: Document,
+    ) -> list[Chunk]:
         raise NotImplementedError

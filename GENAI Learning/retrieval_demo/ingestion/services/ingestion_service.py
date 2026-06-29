@@ -1,25 +1,33 @@
 from itertools import batched
+from pathlib import Path
 
 from loguru import logger
 
 from ingestion.builders.point_builder import PointBuilder
+from ingestion.interfaces.chunker import Chunker
+from ingestion.interfaces.loader import Loader
 from repositories.interfaces.collection_repository import (
     CollectionRepository,
 )
 from repositories.interfaces.point_repository import (
     PointRepository,
 )
-from schemas.chunk import Chunk
 
 
 class IngestionService:
+
     def __init__(
         self,
+        loader: Loader,
+        chunker: Chunker,
         collection_repository: CollectionRepository,
         point_repository: PointRepository,
         point_builder: PointBuilder,
         batch_size: int,
     ) -> None:
+
+        self._loader = loader
+        self._chunker = chunker
         self._collection_repository = collection_repository
         self._point_repository = point_repository
         self._point_builder = point_builder
@@ -27,38 +35,56 @@ class IngestionService:
 
     async def ingest(
         self,
-        chunks: list[Chunk],
+        markdown_file: Path,
     ) -> None:
 
-        if not chunks:
-            logger.warning("No chunks supplied.")
-            return
-
         logger.info(
-            f"Starting ingestion for {len(chunks)} chunks."
+            f"Starting ingestion for '{markdown_file.name}'."
         )
 
         await self._collection_repository.verify_connection()
 
         await self._collection_repository.create_collection()
 
-        for batch in batched(
+        document = await self._loader.load(
+            markdown_file,
+        )
+
+        chunks = await self._chunker.chunk(
+            document,
+        )
+
+        logger.info(
+            f"Generated {len(chunks)} chunks."
+        )
+
+        total_uploaded = 0
+
+        for chunk_batch in batched(
             chunks,
             self._batch_size,
         ):
 
+            chunk_batch = list(chunk_batch)
+
             logger.info(
-                f"Processing batch of {len(batch)} chunks."
+                f"Processing batch of {len(chunk_batch)} chunks."
             )
 
             points = await self._point_builder.build_batch(
-                list(batch),
+                chunk_batch,
             )
 
             await self._point_repository.upload_points(
                 points,
             )
 
+            total_uploaded += len(points)
+
         logger.success(
-            f"Successfully ingested {len(chunks)} chunks."
+            f"Ingestion completed successfully."
+        )
+
+        logger.success(
+            f"Uploaded {total_uploaded} chunks."
         )

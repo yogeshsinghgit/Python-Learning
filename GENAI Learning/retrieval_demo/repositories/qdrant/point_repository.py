@@ -35,13 +35,10 @@ class QdrantPointRepository(PointRepository):
 
             vector={
                 "dense": point.dense.values,
-            },
-
-            sparse_vectors={
                 "sparse": SparseVector(
                     indices=point.sparse.indices,
                     values=point.sparse.values,
-                )
+                ),
             },
 
             payload=point.payload,
