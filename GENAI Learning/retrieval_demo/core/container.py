@@ -38,7 +38,7 @@ class Container:
         self.qdrant_client = AsyncQdrantClient(
             host=settings.qdrant_host,
             port=settings.qdrant_port,
-            api_key=settings.qdrant_api_key,
+            api_key=settings.qdrant_api_key if settings.qdrant_api_key else None,
         )
 
         self.collection_repository = QdrantCollectionRepository(

@@ -1,0 +1,7 @@
+DENSE_VECTOR_NAME = "dense"
+
+SPARSE_VECTOR_NAME = "sparse"
+
+CONTENT_FIELD = "text"
+
+METADATA_FIELD = "metadata"
