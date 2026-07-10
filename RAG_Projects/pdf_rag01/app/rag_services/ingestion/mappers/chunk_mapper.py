@@ -129,7 +129,7 @@ class ChunkMapper:
             chunk_id=str(uuid4()),
             document_id=chunk.document_id,
             text=text,
-            indexed_text=text,
+            indexed_text=text if chunk.indexed_text is not None else None,
             chunk_type=chunk.chunk_type,
             metadata=metadata,
             source_element_ids=deepcopy(chunk.source_element_ids),

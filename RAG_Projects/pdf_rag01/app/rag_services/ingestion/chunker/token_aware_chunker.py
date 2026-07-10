@@ -96,7 +96,9 @@ class TokenAwareChunker(Chunker):
             f"contains {tokenization.token_count} tokens."
         )
 
-        if tokenization.token_count <= self._settings.max_chunk_tokens:
+        settings = self._settings
+
+        if tokenization.token_count <= settings.max_chunk_tokens:
             # Chunk is within limit — just populate token_count metadata.
             return [
                 chunk.model_copy(
@@ -113,7 +115,7 @@ class TokenAwareChunker(Chunker):
         logger.warning(
             f"Chunk '{chunk.chunk_id}' exceeds limit "
             f"({tokenization.token_count} > "
-            f"{self._settings.max_chunk_tokens} tokens). Splitting."
+            f"{settings.max_chunk_tokens} tokens). Splitting."
         )
 
         return self._splitter.split(
