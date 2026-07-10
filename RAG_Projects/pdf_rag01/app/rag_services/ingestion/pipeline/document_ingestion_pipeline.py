@@ -1,0 +1,122 @@
+"""
+Production document ingestion pipeline.
+
+Pipeline:
+
+DocumentLoader
+        ↓
+DocumentPreprocessor
+        ↓
+Chunker
+        ↓
+ChunkEnricher
+        ↓
+VectorDocumentBuilder
+        ↓
+VectorRepository
+"""
+
+from __future__ import annotations
+
+import time
+from pathlib import Path
+
+from loguru import logger
+
+from app.rag_services.ingestion.interfaces.chunk_enricher import ChunkEnricher
+from app.rag_services.ingestion.interfaces.chunker import Chunker
+from app.rag_services.ingestion.interfaces.document_loader import DocumentLoader
+from app.rag_services.ingestion.interfaces.document_preprocessor import (
+    DocumentPreprocessor,
+)
+from app.rag_services.ingestion.models.ingestion_result import (
+    IngestionResult,
+)
+from app.rag_services.vector_db.base import VectorRepository
+from app.rag_services.vector_document_builder.builder import (
+    VectorDocumentBuilder,
+)
+
+
+class DocumentIngestionPipeline:
+    """
+    Coordinates the complete ingestion workflow.
+    """
+
+    def __init__(
+        self,
+        loader: DocumentLoader,
+        preprocessor: DocumentPreprocessor,
+        chunker: Chunker,
+        enricher: ChunkEnricher,
+        vector_document_builder: VectorDocumentBuilder,
+        repository: VectorRepository,
+    ) -> None:
+        self._loader = loader
+        self._preprocessor = preprocessor
+        self._chunker = chunker
+        self._enricher = enricher
+        self._vector_document_builder = vector_document_builder
+        self._repository = repository
+
+    async def ingest(
+        self,
+        file_path: Path,
+    ) -> IngestionResult:
+        """
+        Execute the complete ingestion pipeline.
+        """
+
+        logger.info(
+            f"Starting ingestion for '{file_path.name}'."
+        )
+
+        start_time = time.perf_counter()
+
+        # Load document
+        document = await self._loader.load(file_path)
+
+        # Preprocess
+        document = await self._preprocessor.preprocess(
+            document,
+        )
+
+        # Chunk
+        chunks = await self._chunker.chunk(
+            document,
+        )
+
+        # Enrich
+        chunks = await self._enricher.enrich(
+            chunks,
+        )
+
+        # Build vector documents
+        vector_documents = (
+            await self._vector_document_builder.build(
+                chunks,
+            )
+        )
+
+        # Persist
+        await self._repository.batch_upsert(
+            vector_documents,
+        )
+
+        processing_time = (
+            time.perf_counter() - start_time
+        ) * 1000
+
+        logger.info(
+            f"Ingestion completed for '{file_path.name}' "
+            f"in {processing_time:.2f} ms."
+        )
+
+        return IngestionResult(
+            document_id=document.document_id,
+            filename=document.filename,
+            chunk_count=len(chunks),
+            vector_count=len(vector_documents),
+            checksum=document.metadata.checksum,
+            processing_time_ms=processing_time,
+        )
