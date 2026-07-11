@@ -4,7 +4,7 @@ Base interface for chunk enrichment.
 
 from abc import ABC, abstractmethod
 
-from app.schemas.chunk import Chunk
+from app.schemas.chunk.chunk import Chunk
 
 
 class ChunkEnricher(ABC):

@@ -23,16 +23,6 @@ class VectorStoreRepository(ABC):
     """
 
     @abstractmethod
-    async def initialize(self) -> None:
-        """
-        Initialize the vector database connection.
-
-        This method should:
-        - Create the index if it does not exist.
-        - Connect to the existing index.
-        """
-
-    @abstractmethod
     async def upsert(
         self,
         vectors: list[VectorDocument],

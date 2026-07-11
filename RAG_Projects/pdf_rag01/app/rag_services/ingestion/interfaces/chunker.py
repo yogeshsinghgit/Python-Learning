@@ -5,7 +5,7 @@ Base interface for all chunking strategies.
 from abc import ABC, abstractmethod
 
 from app.schemas.document import Document
-from app.schemas.chunk import Chunk
+from app.schemas.chunk.chunk import Chunk
 
 
 class Chunker(ABC):

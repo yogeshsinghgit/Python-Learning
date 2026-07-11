@@ -21,7 +21,7 @@ from app.infrastructure.embeddings.mapper import (
 from app.infrastructure.vector_db.models import (
     VectorDocument,
 )
-from app.schemas.chunk import Chunk
+from app.schemas.chunk.chunk import Chunk
 
 
 class VectorDocumentBuilder:

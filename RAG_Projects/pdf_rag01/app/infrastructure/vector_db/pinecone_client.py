@@ -12,7 +12,6 @@ from functools import lru_cache
 from pinecone import Pinecone
 
 from app.core.config import get_settings
-from app.infrastructure.vector_db.pinecone_client import PineconeClient
 
 
 class PineconeClient:

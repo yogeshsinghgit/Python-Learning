@@ -32,10 +32,10 @@ from app.rag_services.ingestion.interfaces.document_preprocessor import (
 from app.rag_services.ingestion.models.ingestion_result import (
     IngestionResult,
 )
-from app.rag_services.vector_db.base import VectorRepository
-from app.rag_services.vector_document_builder.builder import (
-    VectorDocumentBuilder,
-)
+
+from app.infrastructure.vector_db.base import VectorStoreRepository
+
+from app.infrastructure.embeddings.vector_document_builder import VectorDocumentBuilder
 
 
 class DocumentIngestionPipeline:
@@ -50,7 +50,7 @@ class DocumentIngestionPipeline:
         chunker: Chunker,
         enricher: ChunkEnricher,
         vector_document_builder: VectorDocumentBuilder,
-        repository: VectorRepository,
+        repository: VectorStoreRepository,
     ) -> None:
         self._loader = loader
         self._preprocessor = preprocessor
@@ -86,20 +86,26 @@ class DocumentIngestionPipeline:
             document,
         )
 
+        logger.success(f"Document chunks are created")
+
         # Enrich
         chunks = await self._enricher.enrich(
             chunks,
         )
 
+        logger.success(f"Chuns encher executed")
+
         # Build vector documents
         vector_documents = (
-            await self._vector_document_builder.build(
+            await self._vector_document_builder.build_batch(
                 chunks,
             )
         )
 
+        logger.success(f"Vector Embeddings generated")
+
         # Persist
-        await self._repository.batch_upsert(
+        await self._repository.upsert(
             vector_documents,
         )
 

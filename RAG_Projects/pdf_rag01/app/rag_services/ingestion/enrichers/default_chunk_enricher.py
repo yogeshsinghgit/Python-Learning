@@ -7,8 +7,8 @@ ensures every chunk has indexed_text populated.
 
 from loguru import logger
 
-from app.ingestion.interfaces.chunk_enricher import ChunkEnricher
-from app.schemas.chunk import Chunk
+from app.rag_services.ingestion.interfaces.chunk_enricher import ChunkEnricher
+from app.schemas.chunk.chunk import Chunk
 
 
 class DefaultChunkEnricher(ChunkEnricher):

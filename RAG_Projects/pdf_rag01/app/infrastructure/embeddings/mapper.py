@@ -7,7 +7,7 @@ from app.infrastructure.vector_db.models import (
     SparseVector,
     VectorDocument,
 )
-from app.schemas.chunk import Chunk
+from app.schemas.chunk.chunk import Chunk
 
 
 def create_vector_document(
@@ -26,6 +26,6 @@ def create_vector_document(
         metadata={
             "document_id": chunk.document_id,
             "text": chunk.text,
-            **chunk.metadata,
+            **chunk.metadata.model_dump(exclude_none=True),
         },
     )

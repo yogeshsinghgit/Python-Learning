@@ -16,8 +16,12 @@ from uuid import uuid4
 
 from loguru import logger
 
-from app.ingestion.interfaces.chunker import Chunker
-from app.schemas.chunk import Chunk, ChunkMetadata, ChunkType
+from app.rag_services.ingestion.interfaces.chunker import Chunker
+from app.rag_services.ingestion.mappers.chunk_mapper import ChunkMapper
+
+from app.schemas.chunk.chunk import Chunk
+from app.schemas.chunk.metadata import ChunkMetadata
+from app.schemas.chunk.enums import ChunkType
 from app.schemas.document import (
     Document,
     DocumentElement,
@@ -54,7 +58,7 @@ class SemanticElementChunker(Chunker):
 
             # New title means current chunk is complete.
             if (
-                element.type == DocumentElementType.TITLE
+                element.element_type == DocumentElementType.TITLE
                 and current_elements
             ):
                 chunks.append(

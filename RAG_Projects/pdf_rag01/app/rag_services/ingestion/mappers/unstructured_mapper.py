@@ -4,8 +4,7 @@ from typing import Any
 
 from unstructured.documents.elements import Element
 
-from app.ingestion.models.document_element import DocumentElement
-from app.ingestion.models.enums import DocumentElementType
+from app.schemas.document import Document, DocumentElement, DocumentElementType
 
 
 class UnstructuredElementMapper:
@@ -40,8 +39,8 @@ class UnstructuredElementMapper:
             metadata = element.metadata.to_dict()
 
         return DocumentElement(
-            id=getattr(element, "id", None),
-            type=element_type,
+            element_id=getattr(element, "id", None),
+            element_type=element_type,
             text=element.text or "",
             page_number=getattr(element.metadata, "page_number", None),
             metadata=metadata,

@@ -81,8 +81,6 @@ class PineconeManager:
                 f"Creating Pinecone index '{self._settings.pinecone_index_name}'."
             )
 
-            # dimension = await dense_embedder.dimension()
-
             self._client.create_index(
                 name=self._settings.pinecone_index_name,
                 dimension=self._settings.embedding_dimension,

@@ -12,10 +12,10 @@ from __future__ import annotations
 
 from loguru import logger
 
-from app.ingestion.interfaces.document_preprocessor import (
-    DocumentPreprocessor,
+from app.rag_services.ingestion.interfaces.document_preprocessor import (
+    DocumentPreprocessor
 )
-from app.ingestion.utils.text_normalizer import TextNormalizer
+from app.rag_services.ingestion.utils.text_normalizer import TextNormalizer
 from app.schemas.document import Document
 
 

@@ -83,9 +83,9 @@ class UnstructuredDocumentLoader(DocumentLoader):
                 f"Failed to load document '{file_path}'."
             )
 
-            raise DocumentLoadingError(
-                f"Unable to load document: {file_path}"
-            ) from exc
+            # raise DocumentLoadingError(
+            #     f"Unable to load document: {file_path}"
+            # ) from exc
 
     @staticmethod
     def _extract_page_count(elements: list) -> int | None:

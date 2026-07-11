@@ -17,4 +17,4 @@ class ChunkMetadata(BaseModel):
 
     element_count: int | None = None
 
-    extra_metadata: dict[str, Any] = Field(default_factory=dict)
+    # extra_metadata: dict[str, Any] = Field(default_factory=dict)

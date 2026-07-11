@@ -10,7 +10,13 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "PDF RAG"
+    APP_NAME: str
+    APP_VERSION: str
+    DEBUG: bool
+
+    HOST: str
+    PORT: int
+    
 
     pinecone_api_key: str = Field(alias="PINECONE_API_KEY")
     pinecone_index_name: str = Field(alias="PINECONE_INDEX_NAME")
