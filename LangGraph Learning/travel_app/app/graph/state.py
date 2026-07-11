@@ -6,5 +6,6 @@ class TravelState(TypedDict):
     Shared state that flows through every node in the graph.
     """
     user_input: str
+    intent: NotRequired[str]
     destination: NotRequired[str]
     response: NotRequired[str]

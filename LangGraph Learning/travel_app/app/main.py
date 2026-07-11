@@ -4,9 +4,14 @@ from graph.builder import graph
 
 
 def main() -> None:
+    # initial_state = {
+    #     "user_input": "Plan a trip to Japan"
+    # }
+
     initial_state = {
-        "user_input": "Plan a trip to Japan"
+        "user_input": "Hello sir"
     }
+
 
 
     logger.info("Starting travel planner graph")
