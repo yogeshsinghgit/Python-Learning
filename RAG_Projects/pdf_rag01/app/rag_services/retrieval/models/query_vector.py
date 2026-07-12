@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
 
+from app.infrastructure.vector_db.models import DenseVector, SparseVector
 
 class QueryVector(BaseModel):
     """
@@ -8,19 +9,5 @@ class QueryVector(BaseModel):
     This model is provider-independent and is consumed by
     the retrieval pipeline.
     """
-
-    model_config = ConfigDict(frozen=True)
-
-    dense_vector: list[float] = Field(
-        description="Dense embedding of the query."
-    )
-
-    sparse_indices: list[int] = Field(
-        default_factory=list,
-        description="Sparse vector indices."
-    )
-
-    sparse_values: list[float] = Field(
-        default_factory=list,
-        description="Sparse vector values."
-    )
+    dense: DenseVector
+    sparse: SparseVector

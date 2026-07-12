@@ -61,6 +61,7 @@ class QueryResult(BaseModel):
     id: str
 
     score: float
+    text: str
 
     metadata: dict[str, Any] = Field(default_factory=dict)
 

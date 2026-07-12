@@ -132,7 +132,7 @@ class PineconeRepository(VectorStoreRepository):
                 namespace=namespace,
                 filter=metadata_filter,
                 include_metadata=True,
-                include_values=True,
+                include_values=False,
             )
 
             results = []
