@@ -19,6 +19,7 @@ from app.rag_services.retrieval.models.retrieval_result import (
 
 from app.rag_services.retrieval.mappers.retrieval_result_mapper import RetrievalResultMapper
 
+from app.rag_services.retrieval.interfaces.reranker import Reranker
 
 class RetrievalPipeline:
     """
@@ -37,11 +38,13 @@ class RetrievalPipeline:
         query_vector_builder: QueryVectorBuilder,
         vector_repository: VectorStoreRepository,
         retrieval_result_mapper: RetrievalResultMapper,
+        reranker: Reranker,
     ) -> None:
         self._query_preprocessor = query_preprocessor
         self._query_vector_builder = query_vector_builder
         self._vector_repository = vector_repository
         self._retrieval_result_mapper = retrieval_result_mapper
+        self._reranker = reranker
 
     async def retrieve(
         self,
@@ -96,6 +99,20 @@ class RetrievalPipeline:
                 query_results
             )
 
+
+            logger.info(
+                f"Retrieved {len(retrieval_results)} chunks before reranking."
+            )
+
+            reranked_results = await self._reranker.rerank(
+                query=normalized_query,
+                results=retrieval_results,
+            )
+
+            logger.success(
+                f"Returning {len(reranked_results)} chunks after reranking."
+            )
+
             elapsed = time.perf_counter() - started_at
 
             logger.success(
@@ -103,7 +120,7 @@ class RetrievalPipeline:
                 f"{elapsed:.3f} seconds."
             )
 
-            return retrieval_results
+            return reranked_results
 
         except Exception as exc:
             logger.exception(

@@ -25,6 +25,12 @@ from app.rag_services.retrieval.mappers.retrieval_result_mapper import (
     RetrievalResultMapper,
 )
 
+from app.rag_services.retrieval.interfaces.reranker import (
+    Reranker,
+)
+from app.rag_services.retrieval.rerankers.noop_reranker import (
+    DefaultReranker,
+)
 
 
 def get_query_preprocessor() -> QueryPreprocessor:
@@ -66,3 +72,7 @@ def get_retrieval_pipeline(
 
 def get_retrieval_result_mapper() -> RetrievalResultMapper:
     return RetrievalResultMapper()
+
+
+def get_reranker() -> Reranker:
+    return DefaultReranker()
