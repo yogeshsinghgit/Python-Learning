@@ -16,10 +16,14 @@ from app.rag_services.retrieval.models.retrieval_request import (
 from app.rag_services.retrieval.models.retrieval_result import (
     RetrievalResult,
 )
+from app.rag_services.retrieval.models.llm_context import (
+    LLMContext
+)
 
 from app.rag_services.retrieval.mappers.retrieval_result_mapper import RetrievalResultMapper
 
 from app.rag_services.retrieval.interfaces.reranker import Reranker
+from app.rag_services.retrieval.interfaces.context_builder import ContextBuilder
 
 class RetrievalPipeline:
     """
@@ -39,17 +43,19 @@ class RetrievalPipeline:
         vector_repository: VectorStoreRepository,
         retrieval_result_mapper: RetrievalResultMapper,
         reranker: Reranker,
+        context_builder: ContextBuilder,
     ) -> None:
         self._query_preprocessor = query_preprocessor
         self._query_vector_builder = query_vector_builder
         self._vector_repository = vector_repository
         self._retrieval_result_mapper = retrieval_result_mapper
         self._reranker = reranker
+        self._context_builder = context_builder
 
     async def retrieve(
         self,
         request: RetrievalRequest,
-    ) -> list[RetrievalResult]:
+    ) -> LLMContext:
 
         logger.info(
             f"Starting retrieval for query: '{request.query}'"
@@ -84,8 +90,7 @@ class RetrievalPipeline:
             # --------------------------------------------------
 
             query_results = await self._vector_repository.query(
-                dense_vector=query_vector.dense,
-                sparse_vector=query_vector.sparse,
+                vector= query_vector,
                 top_k=request.top_k,
                 namespace=request.namespace,
                 metadata_filter=request.metadata_filter,
@@ -104,6 +109,12 @@ class RetrievalPipeline:
                 f"Retrieved {len(retrieval_results)} chunks before reranking."
             )
 
+            elapsed = time.perf_counter() - started_at
+            logger.success(
+                f"Retrieval completed successfully in "
+                f"{elapsed:.3f} seconds."
+            )
+
             reranked_results = await self._reranker.rerank(
                 query=normalized_query,
                 results=retrieval_results,
@@ -113,14 +124,12 @@ class RetrievalPipeline:
                 f"Returning {len(reranked_results)} chunks after reranking."
             )
 
-            elapsed = time.perf_counter() - started_at
-
-            logger.success(
-                f"Retrieval completed successfully in "
-                f"{elapsed:.3f} seconds."
+        
+            llm_context = await self._context_builder.build(
+                reranked_results
             )
 
-            return reranked_results
+            return llm_context
 
         except Exception as exc:
             logger.exception(

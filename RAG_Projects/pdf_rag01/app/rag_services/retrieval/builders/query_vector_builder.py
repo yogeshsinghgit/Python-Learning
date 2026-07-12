@@ -45,9 +45,9 @@ class QueryVectorBuilder:
             )
 
             logger.debug(
-                f"Dense embedding dimension: {len(dense_vector)}"
+                f"Dense embedding dimension: {len(dense_vector.values)}"
             )
-
+            
             logger.debug(
                 f"Sparse embedding contains "
                 f"{len(sparse_vector.indices)} non-zero values."

@@ -15,28 +15,40 @@ from app.infrastructure.embeddings.sparse.fastembed_sparse import (
 
 from dataclasses import dataclass
 
+from app.infrastructure.vector_db.base import VectorStoreRepository
 from app.infrastructure.embeddings.interfaces.dense_embedder import DenseEmbedder
 from app.infrastructure.embeddings.interfaces.sparse_embedder import SparseEmbedder
 
 
 @dataclass
 class AppState:
-    dense_embedder: DenseEmbedder
-    sparse_embedder: SparseEmbedder
+    dense_embedder: DenseEmbedder | None = None
+    sparse_embedder: SparseEmbedder | None = None
+    vector_repository: VectorStoreRepository | None = None
 
+    # Future
+    # cross_encoder: CrossEncoder | None = None
+    # llm_client: LLMClient | None = None
 
-state = AppState(
-    dense_embedder=None,
-    sparse_embedder=None,
-)
+state = AppState()
 
 
 def get_dense_embedder() -> DenseEmbedder:
+    if state.dense_embedder is None:
+        raise RuntimeError("Dense embedder has not been initialized.")
     return state.dense_embedder
 
 
 def get_sparse_embedder() -> SparseEmbedder:
+    if state.sparse_embedder is None:
+        raise RuntimeError("Sparse embedder has not been initialized.")
     return state.sparse_embedder
+
+
+def get_vector_repository() -> VectorStoreRepository:
+    if state.vector_repository is None:
+        raise RuntimeError("Vector repository has not been initialized.")
+    return state.vector_repository
 
 # @lru_cache
 # def get_dense_embedder() -> SentenceTransformerDenseEmbedder:

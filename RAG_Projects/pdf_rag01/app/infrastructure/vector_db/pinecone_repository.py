@@ -116,16 +116,16 @@ class PineconeRepository(VectorStoreRepository):
 
             response = self._index.query(
                 vector=(
-                    vector.dense_vector.values
-                    if vector.dense_vector
+                    vector.dense.values
+                    if vector.dense
                     else None
                 ),
                 sparse_vector=(
                     {
-                        "indices": vector.sparse_vector.indices,
-                        "values": vector.sparse_vector.values,
+                        "indices": vector.sparse.indices,
+                        "values": vector.sparse.values,
                     }
-                    if vector.sparse_vector
+                    if vector.sparse
                     else None
                 ),
                 top_k=top_k,
