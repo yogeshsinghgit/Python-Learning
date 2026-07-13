@@ -42,8 +42,8 @@ class UnstructuredDocumentLoader(DocumentLoader):
             elements = await asyncio.to_thread(
                 partition,
                 filename=str(file_path),
-                strategy="hi_res",          # layout-model-based, much better Title/Header/Footer typing
-                infer_table_structure=True,
+                strategy="auto",          
+                infer_table_structure=False,
             )
 
             mapped_elements = [

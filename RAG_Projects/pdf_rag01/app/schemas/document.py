@@ -4,7 +4,8 @@ Domain models representing parsed documents.
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any
+from typing import Any, TypeAlias
+from collections import defaultdict
 
 from pydantic import BaseModel, Field
 
@@ -75,6 +76,8 @@ class DocumentMetadata(BaseModel):
     extra_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+PageMap: TypeAlias = dict[int, list[DocumentElement]]
+
 class Document(BaseModel):
     """
     Represents a parsed document.
@@ -99,3 +102,17 @@ class Document(BaseModel):
             element.text
             for element in self.elements
         )
+
+    @property
+    def pages(self) -> PageMap:
+        """
+        Group elements by page number, preserving element order within
+        each page. Pages are returned sorted by page number.
+        """
+
+        pages: dict[int, list[DocumentElement]] = defaultdict(list)
+
+        for element in self.elements:
+            pages[element.page_number].append(element)
+
+        return dict(sorted(pages.items()))

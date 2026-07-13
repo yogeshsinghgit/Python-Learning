@@ -29,6 +29,7 @@ from app.rag_services.ingestion.interfaces.document_loader import DocumentLoader
 from app.rag_services.ingestion.interfaces.document_preprocessor import (
     DocumentPreprocessor,
 )
+from app.rag_services.ingestion.interfaces.document_filter_pipeline import DocumentFilterPipeline
 from app.rag_services.ingestion.models.ingestion_result import (
     IngestionResult,
 )
@@ -47,6 +48,7 @@ class DocumentIngestionPipeline:
         self,
         loader: DocumentLoader,
         preprocessor: DocumentPreprocessor,
+        filter_pipeline: DocumentFilterPipeline,
         chunker: Chunker,
         enricher: ChunkEnricher,
         vector_document_builder: VectorDocumentBuilder,
@@ -55,6 +57,7 @@ class DocumentIngestionPipeline:
         self._loader = loader
         self._preprocessor = preprocessor
         self._chunker = chunker
+        self._filter_pipeline = filter_pipeline
         self._enricher = enricher
         self._vector_document_builder = vector_document_builder
         self._repository = repository
@@ -80,6 +83,11 @@ class DocumentIngestionPipeline:
         document = await self._preprocessor.preprocess(
             document,
         )
+
+        # Filter
+        document = await self._filter_pipeline.filter(document)
+
+        logger.success("Document filtering completed.")
 
         # Chunk
         chunks = await self._chunker.chunk(

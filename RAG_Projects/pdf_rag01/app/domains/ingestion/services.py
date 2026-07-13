@@ -34,10 +34,18 @@ from app.infrastructure.embeddings.sparse.fastembed_sparse import FastEmbedSpars
 
 from app.infrastructure.embeddings.providers import get_dense_embedder, get_sparse_embedder
 
-
+from app.rag_services.ingestion.filters.document_filter_pipeline import DefaultDocumentFilterPipeline
+from app.rag_services.ingestion.filters.blank_element_filter import BlankElementFilter
+from app.rag_services.ingestion.filters.header_footer_filter import HeaderFooterFilter
+from app.rag_services.ingestion.filters.front_matter_filter import FrontMatterFilter 
+from app.rag_services.ingestion.filters.page_number_filter import PageNumberFilter
+from app.rag_services.ingestion.filters.table_of_content_filter import TableOfContentsFilter 
 from app.infrastructure.vector_db.pinecone_repository import (
     PineconeRepository,
 )
+
+
+
 
 
 def get_document_ingestion_pipeline() -> DocumentIngestionPipeline:
@@ -47,6 +55,17 @@ def get_document_ingestion_pipeline() -> DocumentIngestionPipeline:
 
     token_counter = TiktokenTokenCounter()
 
+    filter_pipeline = DefaultDocumentFilterPipeline(
+    filters=[
+                BlankElementFilter(),
+                HeaderFooterFilter(),
+                PageNumberFilter(),
+                TableOfContentsFilter(),
+                FrontMatterFilter(),
+                # BoilerplateRepetitionFilter(),
+            ]
+        )
+
     chunker = TokenAwareChunker(
         chunker=SemanticElementChunker(),
         token_counter=token_counter,
@@ -55,9 +74,11 @@ def get_document_ingestion_pipeline() -> DocumentIngestionPipeline:
         ),
     )
 
+
     return DocumentIngestionPipeline(
         loader=UnstructuredDocumentLoader(),
         preprocessor=DefaultDocumentPreprocessor(),
+        filter_pipeline=filter_pipeline,
         chunker=chunker,
         enricher=DefaultChunkEnricher(),
         vector_document_builder=VectorDocumentBuilder(
