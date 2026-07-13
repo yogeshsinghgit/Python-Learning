@@ -40,7 +40,7 @@ async def upload_document(
     logger.info(
         f"Uploading '{file.filename}'."
     )
-
+    temp_path: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
             suffix=".pdf",
@@ -83,5 +83,5 @@ async def upload_document(
 
     finally:
 
-        if temp_path.exists():
+        if temp_path and temp_path.exists():
             temp_path.unlink(missing_ok=True)

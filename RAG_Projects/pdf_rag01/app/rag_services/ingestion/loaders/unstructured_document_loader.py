@@ -42,6 +42,8 @@ class UnstructuredDocumentLoader(DocumentLoader):
             elements = await asyncio.to_thread(
                 partition,
                 filename=str(file_path),
+                strategy="hi_res",          # layout-model-based, much better Title/Header/Footer typing
+                infer_table_structure=True,
             )
 
             mapped_elements = [
@@ -83,9 +85,9 @@ class UnstructuredDocumentLoader(DocumentLoader):
                 f"Failed to load document '{file_path}'."
             )
 
-            # raise DocumentLoadingError(
-            #     f"Unable to load document: {file_path}"
-            # ) from exc
+            raise DocumentLoadingError(
+                f"Unable to load document: {file_path}"
+            ) from exc
 
     @staticmethod
     def _extract_page_count(elements: list) -> int | None:
