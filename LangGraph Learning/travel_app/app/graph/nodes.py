@@ -43,9 +43,14 @@ def find_hotels(state: TravelState) -> dict:
 
     logger.success(f"Found {len(hotels)} hotels")
 
+    # return {
+    #     "hotels": hotels,
+    # }
+
     return {
-        "hotels": hotels,
+        "places":hotels,
     }
+
 
 
 def find_attractions(state: TravelState) -> dict:
@@ -61,9 +66,13 @@ def find_attractions(state: TravelState) -> dict:
 
     logger.success(f"Found {len(attractions)} attractions")
 
+    # return {
+    #     "attractions": attractions,
+    # }
     return {
-        "attractions": attractions,
+        "places": attractions,
     }
+
 
 
 def build_response(state: TravelState) -> dict:
@@ -71,26 +80,17 @@ def build_response(state: TravelState) -> dict:
 
     destination = state["destination"]
 
-    hotels = state["hotels"]
+    # hotels = state["hotels"]
 
-    attractions = state["attractions"]
+    # attractions = state["attractions"]
+    places = state["places"]
 
-    response = f"""
-Trip Plan for {destination}
+    response = "Trip Plan\n\n"
 
-Hotels:
-- {hotels[0]}
-- {hotels[1]}
-- {hotels[2]}
-
-Attractions:
-- {attractions[0]}
-- {attractions[1]}
-- {attractions[2]}
-""".strip()
-
-    logger.success("Travel response created")
+    for place in places:
+        response += f"- {place}\n"
 
     return {
         "response": response,
     }
+    

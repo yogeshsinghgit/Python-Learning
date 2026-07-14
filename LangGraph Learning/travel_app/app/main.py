@@ -5,10 +5,10 @@ from graph.builder import graph
 
 def main() -> None:
     test_queries = [
-        "Hello",
-        "Plan a trip to Japan",
+        # "Hello",
+        # "Plan a trip to Japan",
         "Plan a trip to India",
-        "Plan a trip to France",
+        # "Plan a trip to France",
     ]
 
     for query in test_queries:
@@ -22,7 +22,7 @@ def main() -> None:
         )
 
         logger.success("Graph execution completed")
-        logger.info(f"Final State:\n{result}")
+        logger.info(f"Final State:\n{result['response']}")
 
 
 if __name__ == "__main__":
