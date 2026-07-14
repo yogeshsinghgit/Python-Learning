@@ -4,23 +4,25 @@ from graph.builder import graph
 
 
 def main() -> None:
-    # initial_state = {
-    #     "user_input": "Plan a trip to Japan"
-    # }
+    test_queries = [
+        "Hello",
+        "Plan a trip to Japan",
+        "Plan a trip to India",
+        "Plan a trip to France",
+    ]
 
-    initial_state = {
-        "user_input": "Hello sir"
-    }
+    for query in test_queries:
+        logger.info("=" * 60)
+        logger.info(f"Input: {query}")
 
+        result = graph.invoke(
+            {
+                "user_input": query,
+            }
+        )
 
-
-    logger.info("Starting travel planner graph")
-
-    result = graph.invoke(initial_state)
-
-    logger.success("Graph execution completed")
-
-    logger.info(f"Final state: {result}")
+        logger.success("Graph execution completed")
+        logger.info(f"Final State:\n{result}")
 
 
 if __name__ == "__main__":

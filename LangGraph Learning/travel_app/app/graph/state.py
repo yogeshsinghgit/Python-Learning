@@ -2,10 +2,12 @@ from typing import NotRequired, TypedDict
 
 
 class TravelState(TypedDict):
-    """
-    Shared state that flows through every node in the graph.
-    """
     user_input: str
+
     intent: NotRequired[str]
     destination: NotRequired[str]
+
+    hotels: NotRequired[list[str]]
+    attractions: NotRequired[list[str]]
+
     response: NotRequired[str]

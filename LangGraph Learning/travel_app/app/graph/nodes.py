@@ -1,19 +1,14 @@
+from loguru import logger
+
 from graph.state import TravelState
 
 
-# Node 1 - Parse User Input
 def parse_user_input(state: TravelState) -> dict:
-    """
-    Parse the user's request and determine the intent.
+    logger.info("Executing parse_user_input")
 
-    For this learning project:
-    - If the input contains the word 'trip', classify it as a travel request.
-    - Otherwise, classify it as a greeting.
-    """
+    user_input = state["user_input"]
 
-    user_input = state["user_input"].lower()
-
-    if "trip" in user_input:
+    if "trip" in user_input.lower():
         destination = user_input.split()[-1]
 
         return {
@@ -22,26 +17,80 @@ def parse_user_input(state: TravelState) -> dict:
         }
 
     return {
-        "intent": "greeting"
+        "intent": "greeting",
     }
 
 
-def generate_travel_plan(state: TravelState) -> dict:
-    """
-    Generate a simple travel response.
-    """
+def generate_greeting(state: TravelState) -> dict:
+    logger.info("Executing generate_greeting")
+
+    return {
+        "response": "Hi there!!!"
+    }
+
+
+
+def find_hotels(state: TravelState) -> dict:
+    logger.info("Executing find_hotels")
 
     destination = state["destination"]
 
+    hotels = [
+        f"{destination} Grand Hotel",
+        f"{destination} Central Hotel",
+        f"{destination} Palace Hotel",
+    ]
+
+    logger.success(f"Found {len(hotels)} hotels")
+
     return {
-        "response": f"I'll create a wonderful travel itinerary for your trip to {destination}!"
+        "hotels": hotels,
     }
 
-# Node 2 - Generate Greeting
-def generate_greeting(state: TravelState)-> dict:
-    """
-    Generate a greeting using the extracted destination.
-    """
+
+def find_attractions(state: TravelState) -> dict:
+    logger.info("Executing find_attractions")
+
+    destination = state["destination"]
+
+    attractions = [
+        f"{destination} Castle",
+        f"{destination} National Museum",
+        f"{destination} City Park",
+    ]
+
+    logger.success(f"Found {len(attractions)} attractions")
+
     return {
-        "response": f"Hi there!!!"
+        "attractions": attractions,
+    }
+
+
+def build_response(state: TravelState) -> dict:
+    logger.info("Executing build_response")
+
+    destination = state["destination"]
+
+    hotels = state["hotels"]
+
+    attractions = state["attractions"]
+
+    response = f"""
+Trip Plan for {destination}
+
+Hotels:
+- {hotels[0]}
+- {hotels[1]}
+- {hotels[2]}
+
+Attractions:
+- {attractions[0]}
+- {attractions[1]}
+- {attractions[2]}
+""".strip()
+
+    logger.success("Travel response created")
+
+    return {
+        "response": response,
     }
