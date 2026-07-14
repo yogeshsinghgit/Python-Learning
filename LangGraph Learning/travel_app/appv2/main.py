@@ -1,4 +1,5 @@
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage
 from pathlib import Path
 from graph.builder import graph
 
@@ -12,6 +13,20 @@ from graph.builder import graph
 result = graph.invoke(
     {
         "messages": [
+            SystemMessage(
+                content="""
+                    You are a travel assistant.
+
+                    Use the available tools whenever you need hotel or attraction information.
+
+                    After receiving the tool results, produce the final answer.
+
+                    Do NOT call the same tool again unless the user explicitly asks for new information.
+
+                    If all required information is available, respond to the user and do not make additional tool calls.
+                    """
+           
+            ),
             HumanMessage(
                 content="Find hotels in Japan"
             )
@@ -19,4 +34,10 @@ result = graph.invoke(
     }
 )
 
-print(result["messages"][-1].content)
+
+
+for index, message in enumerate(result["messages"]):
+    if isinstance(message, AIMessage):
+        print(f"\nAI Message {index}")
+        print("Content:", message.content)
+        print("Tool Calls:", message.tool_calls)

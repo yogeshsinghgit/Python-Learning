@@ -1,4 +1,5 @@
 from langchain_core.tools import tool
+from loguru import logger
 
 
 @tool
@@ -6,6 +7,7 @@ def search_hotels(destination: str) -> list[str]:
     """
     Search hotels for a destination.
     """
+    logger.info(f"Executing tool: search_hotels({destination})")
 
     return [
         f"{destination} Grand Hotel",
@@ -19,6 +21,7 @@ def search_attractions(destination: str) -> list[str]:
     """
     Search tourist attractions.
     """
+    logger.info(f"Executing tool: search_attractions({destination})")
 
     return [
         f"{destination} Castle",
