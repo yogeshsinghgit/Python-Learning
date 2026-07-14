@@ -28,15 +28,15 @@ builder.add_node(BUILD_RESPONSE, build_response)
 
 builder.add_edge(START, PARSE_USER_INPUT)
 
-builder.add_conditional_edges(
-    PARSE_USER_INPUT,
-    route_request,
-    {
-        GENERATE_GREETING: GENERATE_GREETING,
-        FIND_HOTELS: FIND_HOTELS,
-        FIND_ATTRACTIONS: FIND_ATTRACTIONS,
-    },
-)
+# builder.add_conditional_edges(
+#     PARSE_USER_INPUT,
+#     route_request,
+#     {
+#         GENERATE_GREETING: GENERATE_GREETING,
+#         FIND_HOTELS: FIND_HOTELS,
+#         FIND_ATTRACTIONS: FIND_ATTRACTIONS,
+#     },
+# )
 
 builder.add_edge(
     [FIND_HOTELS, FIND_ATTRACTIONS],
