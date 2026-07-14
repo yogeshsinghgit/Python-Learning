@@ -55,7 +55,7 @@ class RetrievalPipeline:
     async def retrieve(
         self,
         request: RetrievalRequest,
-    ) -> LLMContext:
+    ) -> list[RetrievalResult]:
 
         logger.info(
             f"Starting retrieval for query: '{request.query}'"
@@ -125,11 +125,11 @@ class RetrievalPipeline:
             )
 
         
-            llm_context = await self._context_builder.build(
-                reranked_results
-            )
+            # llm_context = await self._context_builder.build(
+            #     reranked_results
+            # )
 
-            return llm_context
+            # return llm_context
 
         except Exception as exc:
             logger.exception(

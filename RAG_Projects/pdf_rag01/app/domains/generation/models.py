@@ -56,21 +56,36 @@ class TokenBudget(BaseModel):
 
     reserved_response_tokens: int
 
+    system_budget: int
+
+    history_budget: int
+
+    context_budget: int
+
+    query_budget: int
+
+    available_budget: int
+
+class TokenUsage(BaseModel):
     system_tokens: int = 0
 
     history_tokens: int = 0
 
-    rag_context_tokens: int = 0
+    context_tokens: int = 0
 
-    user_tokens: int = 0
+    query_tokens: int = 0
 
-    remaining_tokens: int = 0
+    total_tokens: int = 0
+
+class TokenizedMessage(BaseModel):
+    message: ChatMessage
+    token_count: int
 
 
 class ContextWindow(BaseModel):
     messages: list[ChatMessage]
-
     token_budget: TokenBudget
+    token_usage: TokenUsage
 
 
 class Citation(BaseModel):
@@ -100,13 +115,14 @@ class StructuredOutput(BaseModel):
 
 
 class PromptVariables(BaseModel):
+
+    model_config = ConfigDict(frozen=True)
+
     query: str
 
-    context: str = ""
+    context: str
 
-    conversation_history: str = ""
-
-    answer: str = ""
+    history: str = ""
 
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -123,6 +139,24 @@ class GenerationRequest(BaseModel):
 
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+class ContextChunk(BaseModel):
+    chunk_id: str
+
+    document_id: str
+
+    content: str
+
+    score: float
+
+    page_number: int | None = None
+
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class TokenizedContextChunk(BaseModel):
+    chunk: ContextChunk
+
+    token_count: int
 
 class GenerationResult(BaseModel):
     answer: str
@@ -132,3 +166,26 @@ class GenerationResult(BaseModel):
     usage: UsageMetrics | None = None
 
     raw_response: str | None = None
+
+class LLMRequest(BaseModel):
+    messages: list[ChatMessage]
+
+    temperature: float = 0.2
+
+    max_tokens: int = 1024
+
+    top_p: float = 1.0
+
+    stream: bool = False
+
+    response_format: dict[str, Any] | None = None
+
+
+class LLMResponse(BaseModel):
+    content: str
+
+    finish_reason: str | None = None
+
+    usage: UsageMetrics | None = None
+
+    raw_response: dict[str, Any] | None = None
