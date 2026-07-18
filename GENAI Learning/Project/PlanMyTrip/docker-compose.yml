@@ -1,6 +1,25 @@
-version: "3.9"
-
 services:
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: travel-agent-api
+
+    env_file:
+      - .env
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    restart: unless-stopped
 
   postgres:
     image: postgres:16
@@ -15,7 +34,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
     ports:
-      - "5432:5432"
+      - "5433:5432"  # host:5433 → container:5432 (avoids conflict with local postgres)
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -46,7 +65,5 @@ services:
       retries: 5
 
 volumes:
-
   postgres_data:
-
   redis_data:

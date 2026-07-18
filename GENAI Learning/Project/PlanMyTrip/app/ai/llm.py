@@ -3,20 +3,36 @@ from langchain_groq import ChatGroq
 from app.core.config import settings
 
 
-_llm: ChatGroq | None = None
+class LLMClient:
+    """
+    Wrapper around the application's LLM.
+    """
 
+    def __init__(self) -> None:
+        self._client: ChatGroq | None = None
 
-def get_llm() -> ChatGroq:
+    async def connect(self) -> None:
 
-    global _llm
+        if self._client is not None:
+            return
 
-    if _llm is None:
-
-        _llm = ChatGroq(
+        self._client = ChatGroq(
             model=settings.DEFAULT_MODEL,
             api_key=settings.GROQ_API_KEY,
             temperature=settings.TEMPERATURE,
             max_tokens=settings.MAX_TOKENS,
         )
 
-    return _llm
+    async def disconnect(self) -> None:
+        # Nothing to dispose today, but keeping a uniform lifecycle.
+        self._client = None
+
+    @property
+    def client(self) -> ChatGroq:
+
+        if self._client is None:
+            raise RuntimeError(
+                "LLM is not initialized."
+            )
+
+        return self._client

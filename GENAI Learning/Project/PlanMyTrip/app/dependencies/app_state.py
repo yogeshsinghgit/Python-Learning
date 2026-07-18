@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 from app.ai.travel_agent import TravelAgent
-from redis.asyncio import Redis
-from langchain_groq import ChatGroq
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from psycopg import AsyncConnection
+from app.ai.llm import LLMClient
+from app.ai.checkpointer import CheckpointerClient
+from app.db.postgres_client import PostgresClient
+from app.db.redis_client import RedisClient
 
 @dataclass(slots=True)
 class AppState:
@@ -15,13 +15,13 @@ class AppState:
     application startup and accessed through this object.
     """
 
-    redis: Redis | None = None
+    redis: RedisClient | None = None
 
-    postgres: AsyncConnection | None = None
+    postgres: PostgresClient | None = None
 
-    llm: ChatGroq | None = None
+    llm: LLMClient | None = None
 
-    checkpointer: AsyncPostgresSaver | None = None
+    checkpointer: CheckpointerClient | None = None
 
     travel_agent: TravelAgent | None = None
 

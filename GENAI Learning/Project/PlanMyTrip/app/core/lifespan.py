@@ -9,10 +9,11 @@ from app.core.logging import configure_logging
 from app.dependencies.app_state import AppState
 from app.ai.travel_agent import TravelAgent
 
-from app.db.redis_client import connect_redis, disconnect_redis
-from app.db.postgres_client import connect_postgres, disconnect_postgres
-from app.graph.checkpointer import get_checkpointer
-from app.graph.llm import get_llm
+from app.db.postgres_client import PostgresClient
+from app.db.redis_client import RedisClient
+
+from app.ai.checkpointer import CheckpointerClient
+from app.ai.llm import LLMClient
 
 
 
@@ -30,25 +31,30 @@ async def lifespan(app: FastAPI):
 
     try:
 
-        app_state.postgres = await connect_postgres()
+        app_state.postgres = PostgresClient()
+        await app_state.postgres.connect()
         logger.success("Postgres Connected")
 
         logger.info("Connecting to Redis...")
-
-        app_state.redis = await connect_redis()
-
+        app_state.redis = RedisClient()
+        await app_state.redis.connect()
         logger.success("Redis connected successfully.")
 
-        app_state.llm = get_llm()
+        app_state.llm = LLMClient()
+        await app_state.llm.connect()
         logger.success("LLM Connected")
 
-        app_state.checkpointer = await get_checkpointer()
+        app_state.checkpointer = CheckpointerClient(
+            postgres=app_state.postgres
+        )
+        await app_state.checkpointer.connect()
         logger.success("Checkpointer Ready")
 
         app_state.travel_agent = TravelAgent(
-            llm=app_state.llm,
-            checkpointer=app_state.checkpointer,
+            llm=app_state.llm.client,
+            checkpointer=app_state.checkpointer.client,
         )
+        logger.success("Travel agent initialized.")
 
         app.state.app_state = app_state
 
@@ -63,12 +69,16 @@ async def lifespan(app: FastAPI):
     finally:
         logger.info("Shutting down application...")
 
+        if app_state.checkpointer is not None:
+            await app_state.checkpointer.disconnect()
+
+        if app_state.llm is not None:
+            await app_state.llm.disconnect()
+
         if app_state.redis is not None:
-            await disconnect_redis()
-            logger.info("Redis connection closed.")
+            await app_state.redis.disconnect()
 
         if app_state.postgres is not None:
-            await disconnect_postgres()
-            logger.info("Postgres connection closed.")
+            await app_state.postgres.disconnect()
 
         logger.success("Application shutdown completed.")

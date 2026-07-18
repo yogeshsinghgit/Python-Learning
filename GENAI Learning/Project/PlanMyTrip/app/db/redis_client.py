@@ -2,31 +2,42 @@ from redis.asyncio import Redis
 
 from app.core.config import settings
 
-_redis: Redis | None = None
 
+class RedisClient:
+    """
+    Application wrapper around Redis.
+    """
 
-async def connect_redis() -> Redis:
+    def __init__(self) -> None:
+        self._client: Redis | None = None
 
-    global _redis
+    async def connect(self) -> None:
 
-    if _redis is None:
+        if self._client is not None:
+            return
 
-        _redis = Redis.from_url(
+        self._client = Redis.from_url(
             settings.redis_url,
             decode_responses=True,
         )
 
-        await _redis.ping()
+        await self._client.ping()
 
-    return _redis
+    async def disconnect(self) -> None:
 
+        if self._client is None:
+            return
 
-async def disconnect_redis():
+        await self._client.close()
 
-    global _redis
+        self._client = None
 
-    if _redis:
+    @property
+    def client(self) -> Redis:
 
-        await _redis.close()
+        if self._client is None:
+            raise RuntimeError(
+                "Redis is not connected."
+            )
 
-        _redis = None
+        return self._client

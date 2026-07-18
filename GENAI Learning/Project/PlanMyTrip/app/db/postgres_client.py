@@ -4,16 +4,20 @@ from psycopg.rows import dict_row
 from app.core.config import settings
 
 
-_connection: AsyncConnection | None = None
+class PostgresClient:
+    """
+    Application wrapper around PostgreSQL.
+    """
 
+    def __init__(self) -> None:
+        self._connection: AsyncConnection | None = None
 
-async def connect_postgres() -> AsyncConnection:
+    async def connect(self) -> None:
 
-    global _connection
+        if self._connection is not None:
+            return
 
-    if _connection is None:
-
-        _connection = await AsyncConnection.connect(
+        self._connection = await AsyncConnection.connect(
             conninfo=settings.postgres_url.replace(
                 "postgresql+asyncpg",
                 "postgresql",
@@ -22,15 +26,21 @@ async def connect_postgres() -> AsyncConnection:
             autocommit=True,
         )
 
-    return _connection
+    async def disconnect(self) -> None:
 
+        if self._connection is None:
+            return
 
-async def disconnect_postgres():
+        await self._connection.close()
 
-    global _connection
+        self._connection = None
 
-    if _connection:
+    @property
+    def connection(self) -> AsyncConnection:
 
-        await _connection.close()
+        if self._connection is None:
+            raise RuntimeError(
+                "PostgreSQL is not connected."
+            )
 
-        _connection = None
+        return self._connection
