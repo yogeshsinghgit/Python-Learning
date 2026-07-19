@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from app.ai.checkpointer import CheckpointerClient
 from app.ai.llm import LLMClient
+from app.ai.planner.service import PlannerService
 from app.db.redis_client import RedisClient
 
 from app.ai.runtime_dependencies.graph_context import GraphContext
@@ -22,7 +23,10 @@ class AgentRuntime:
         Build the execution context passed to LangGraph nodes.
         """
 
+        planner = PlannerService(llm=self.llm.client)
+
         return GraphContext(
             llm=self.llm.client,
             redis=self.redis.client,
+            planner=planner,
         )

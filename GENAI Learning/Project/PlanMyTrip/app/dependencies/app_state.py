@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from app.ai.travel_agent import TravelAgent
+from app.ai.agents.travel_agent import TravelAgent
 from app.ai.llm import LLMClient
 from app.ai.checkpointer import CheckpointerClient
 from app.db.postgres_client import PostgresClient

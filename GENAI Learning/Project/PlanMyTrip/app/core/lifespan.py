@@ -5,12 +5,12 @@ from loguru import logger
 from redis.asyncio import Redis
 
 
-from app.ai.runtime import AgentRuntime
+from app.ai.runtime_dependencies.runtime import AgentRuntime
 
 from app.core.config import settings
 from app.core.logging import configure_logging
 from app.dependencies.app_state import AppState
-from app.ai.travel_agent import TravelAgent
+from app.ai.agents.travel_agent import TravelAgent
 
 from app.db.postgres_client import PostgresClient
 from app.db.redis_client import RedisClient
@@ -59,9 +59,9 @@ async def lifespan(app: FastAPI):
         # )
         # logger.success("Travel agent initialized.")
         runtime = AgentRuntime(
-            llm=app_state.llm.client,
-            checkpointer=app_state.checkpointer.client,
-            redis=app_state.redis.client
+            llm=app_state.llm,
+            checkpointer=app_state.checkpointer,
+            redis=app_state.redis,
         )
 
         app_state.travel_agent = TravelAgent(

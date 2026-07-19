@@ -1,7 +1,7 @@
 from fastapi import Request, Depends
 from redis.asyncio import Redis
 
-from app.ai.travel_agent import TravelAgent
+from app.ai.agents.travel_agent import TravelAgent
 from app.dependencies.app_state import AppState
 from langchain_groq import ChatGroq
 

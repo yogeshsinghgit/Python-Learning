@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from redis.asyncio import Redis
+from app.ai.planner.service import PlannerService
 
 
 @dataclass(slots=True, frozen=True)
@@ -15,3 +16,4 @@ class GraphContext:
 
     llm: BaseChatModel
     redis: Redis
+    planner: PlannerService

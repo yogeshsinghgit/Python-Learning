@@ -1,7 +1,7 @@
 from langchain_core.messages import AIMessage
 
 from app.ai.agents.base import BaseAgent
-from app.ai.runtime import AgentRuntime
+from app.ai.runtime_dependencies.runtime import AgentRuntime
 from app.graph.builder import build_graph
 
 

@@ -10,7 +10,7 @@ class BaseAgent(ABC):
     """
 
     def __init__(self, checkpointer: Any) -> None:
-        builder = self.build_graph()
+        builder = self._build_graph()
         self._graph: CompiledStateGraph = builder.compile(
             checkpointer=checkpointer,
         )
