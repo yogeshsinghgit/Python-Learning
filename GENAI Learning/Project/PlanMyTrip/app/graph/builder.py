@@ -3,9 +3,10 @@ from functools import partial
 from langgraph.graph import END, START, MessagesState, StateGraph
 
 from app.graph.nodes import chatbot_node
+from app.ai.runtime_dependencies.graph_context import GraphContext
 
 
-def build_graph(llm):
+def build_graph(context:GraphContext):
 
     builder = StateGraph(MessagesState)
 

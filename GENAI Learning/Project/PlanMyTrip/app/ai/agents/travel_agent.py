@@ -15,9 +15,9 @@ class TravelAgent(BaseAgent):
     
         super().__init__(runtime.checkpointer.client)
 
-    def build_graph(self):
-        return _build_graph(
-            llm=self._runtime.llm.client,
+    def _build_graph(self):
+        return build_graph(
+            context = self._runtime.create_graph_context(),
         )
 
     async def chat(

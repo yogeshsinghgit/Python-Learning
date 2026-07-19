@@ -2,12 +2,13 @@ from langchain_core.messages import SystemMessage
 from langgraph.graph import MessagesState
 from loguru import logger
 
+from app.ai.runtime_dependencies.graph_context import GraphContext
 from app.graph.prompts import SYSTEM_PROMPT
 
 
 async def chatbot_node(
     state: MessagesState,
-    llm,
+    context: GraphContext
 ):
     """
     Main chatbot node.
@@ -15,7 +16,7 @@ async def chatbot_node(
 
     logger.info("Executing chatbot node.")
 
-    response = await llm.ainvoke(
+    response = await context.llm.ainvoke(
         [
             SystemMessage(content=SYSTEM_PROMPT),
             *state["messages"],
