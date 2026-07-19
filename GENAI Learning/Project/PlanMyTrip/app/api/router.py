@@ -5,8 +5,9 @@ from app.api.routes.chat import (
     router as chat_router,
 )
 
-api_router = APIRouter()
+from app.core.constants import API_V1_PREFIX
 
+api_router = APIRouter(prefix=API_V1_PREFIX)
 api_router.include_router(health_router)
 
 api_router.include_router(chat_router)
