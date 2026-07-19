@@ -4,6 +4,9 @@ from fastapi import FastAPI
 from loguru import logger
 from redis.asyncio import Redis
 
+
+from app.ai.runtime import AgentRuntime
+
 from app.core.config import settings
 from app.core.logging import configure_logging
 from app.dependencies.app_state import AppState
@@ -50,11 +53,20 @@ async def lifespan(app: FastAPI):
         await app_state.checkpointer.connect()
         logger.success("Checkpointer Ready")
 
-        app_state.travel_agent = TravelAgent(
+        # app_state.travel_agent = TravelAgent(
+        #     llm=app_state.llm.client,
+        #     checkpointer=app_state.checkpointer.client,
+        # )
+        # logger.success("Travel agent initialized.")
+        runtime = AgentRuntime(
             llm=app_state.llm.client,
             checkpointer=app_state.checkpointer.client,
+            redis=app_state.redis.client
         )
-        logger.success("Travel agent initialized.")
+
+        app_state.travel_agent = TravelAgent(
+            runtime=runtime,
+        )
 
         app.state.app_state = app_state
 
