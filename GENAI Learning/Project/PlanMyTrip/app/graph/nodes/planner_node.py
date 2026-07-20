@@ -53,5 +53,5 @@ async def planner_node(
     )
 
     return {
-        "planner_decision": decision,
+        "planner_decision": decision.model_dump(mode="json"),
     }

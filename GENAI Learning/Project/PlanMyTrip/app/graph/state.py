@@ -1,6 +1,6 @@
-from langgraph.graph import MessagesState
+from typing import Any
 
-from app.ai.planner.models import PlannerDecision
+from langgraph.graph import MessagesState
 
 
 class GraphState(MessagesState):
@@ -14,4 +14,12 @@ class GraphState(MessagesState):
     our workflow.
     """
 
-    planner_decision: PlannerDecision | None = None
+    # Stored as a plain dict (PlannerDecision.model_dump(mode="json")),
+    # never as the Pydantic model itself. LangGraph's Postgres
+    # checkpointer serializes state via msgpack, which only safely
+    # round-trips primitives/dicts/lists — custom types (including
+    # the PlannerIntent enum inside PlannerDecision) require an
+    # unregistered-type fallback that LangGraph has flagged for
+    # removal. Reconstruct the typed PlannerDecision where it's
+    # actually needed (see chatbot_node.py) instead of persisting it.
+    planner_decision: dict[str, Any] | None = None

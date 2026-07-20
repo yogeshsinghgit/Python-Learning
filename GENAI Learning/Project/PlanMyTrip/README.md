@@ -84,6 +84,28 @@ app/
 │   └── runtime_dependencies/
 │       └── runtime.py
 │
+├── capabilities/
+│   ├── weather/
+│   │   ├── schemas.py
+│   │   ├── provider.py
+│   │   ├── exceptions.py
+│   │   ├── providers/
+│   │   │   └── open_meteo.py
+│   │   ├── client.py
+│   │   └── tool.py
+│   ├── attraction/
+│   │   ├── schemas.py
+│   │   ├── provider.py
+│   │   ├── exceptions.py
+│   │   ├── providers/
+│   │   │   └── open_trip_map.py
+│   │   ├── client.py
+│   │   └── tool.py
+│   ├── hotel/
+│   │   └── tool.py
+│   └── trip_planner/
+│       └── tool.py
+│
 ├── graph/
 │   ├── builder.py
 │   ├── graph_context.py
@@ -99,7 +121,7 @@ app/
 │   └── lifespan.py
 │
 └── tools/
-    (planned)
+    └── __init__.py
 ```
 
 ------------------------------------------------------------------------
@@ -224,9 +246,9 @@ ToolNode integration is planned.
 
 ------------------------------------------------------------------------
 
-# Planned Architecture (Do NOT Simplify)
+# Current & Planned Architecture
 
-The project should follow:
+The project follows a clean capability-centric structure:
 
 ``` text
 TravelAgent
@@ -237,49 +259,40 @@ TravelAgent
 │
 ├── ToolNode (LangGraph)
 │
-└── Domain Tools
+└── Capabilities (Self-contained integration/business logic)
       │
-      ├── HotelTool
-      │       │
-      │       ▼
-      │   HotelAgent
-      │       │
-      │       ▼
-      │   HotelService
+      ├── Hotel
+      │    └── HotelTool (Mocked)
       │
-      ├── WeatherTool
-      │       │
-      │       ▼
-      │   WeatherAgent
+      ├── Weather
+      │    ├── WeatherTool
+      │    └── WeatherClient (Domain logic client) -> OpenMeteoWeatherProvider
       │
-      └── AttractionTool
-              │
-              ▼
-          AttractionAgent
+      └── Attraction
+           ├── AttractionTool
+           └── AttractionClient (Domain logic client) -> OpenTripMapAttractionProvider
 ```
 
 Important:
 
 -   Use LangGraph's ToolNode.
 -   Do NOT implement a custom tool executor.
--   Domain logic belongs in domain agents/services, not inside tools.
+-   Integration and orchestration logic belongs in capability clients (e.g., `WeatherClient`), not inside tools.
 
 ------------------------------------------------------------------------
 
 # Tool Design Requirements
 
-Every tool should be class-based.
+Production tools should be class-based. Mocked tools may use simple `@tool` decorators.
 
-No simple `@tool` decorators.
-
-Each tool should contain:
+Each class-based tool contains:
 
 -   Pydantic Input model
 -   Pydantic Output model
 -   Async execution
 -   Validation
 -   Dependency Injection
--   Thin adapter over domain agent
+-   Thin adapter over capability client
 
 ------------------------------------------------------------------------
 
@@ -314,11 +327,11 @@ Completed:
 -   TravelAgent
 -   ChatService
 -   Structured planner pipeline
+-   Class-based tools and clients for Weather and Attraction
+-   Reorganized capabilities-based directory structure
 
 Next:
 
-1.  Build class-based domain tools.
-2.  Implement HotelAgent / WeatherAgent / AttractionAgent.
-3.  Integrate LangGraph ToolNode.
-4.  Connect ToolNode back to Chatbot.
-5.  Replace mock services with real APIs.
+1.  Integrate LangGraph ToolNode.
+2.  Connect ToolNode back to Chatbot.
+3.  Implement class-based tools / clients for Hotel and Trip Planner capabilities, replacing mocks with real APIs.

@@ -31,8 +31,10 @@ class PlannerService:
     def __init__(
         self,
         llm: BaseChatModel,
+        available_tools: list[str] | None = None,
     ) -> None:
         self._prompt = PlannerPrompts.SYSTEM
+        self._available_tools = available_tools or []
 
         self._planner_llm = llm.with_structured_output(
             PlannerDecision
@@ -68,6 +70,7 @@ class PlannerService:
                 {
                     "query": request.query,
                     "history": request.history,
+                    "available_tools": ", ".join(self._available_tools) or "none",
                 }
             )
 

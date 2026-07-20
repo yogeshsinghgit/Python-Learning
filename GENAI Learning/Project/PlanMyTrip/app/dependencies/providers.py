@@ -1,10 +1,10 @@
 from fastapi import Request, Depends
-from redis.asyncio import Redis
 
 from app.ai.agents.travel_agent import TravelAgent
-from app.dependencies.app_state import AppState
-from app.ai.llm import LLMClient
 from app.ai.checkpointer import CheckpointerClient
+from app.ai.llm import LLMClient
+from app.dependencies.app_state import AppState
+from app.db.redis_client import RedisClient
 
 from app.services.chat_service import ChatService
 
@@ -12,7 +12,7 @@ from app.services.chat_service import ChatService
 def get_app_state(request: Request) -> AppState:
     return request.app.state.app_state
 
-def get_redis(request: Request) -> Redis:
+def get_redis(request: Request) -> RedisClient:
     return request.app.state.app_state.redis
 
 def get_llm(request: Request) -> LLMClient:
